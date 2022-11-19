@@ -1,0 +1,28 @@
+.grid {
+    margin: 1em auto;
+    border-collapse: collapse;
+}
+
+.grid td {
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ccc;
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 10px;
+    border: 1px solid darkgrey;
+    background-color: green;
+}
+.grid td[state='black'] {
+    background-color: black;
+}
+
+.grid td[state='white'] {
+    background-color: white;
+}
+
+.grid td:hover {
+    opacity: .6;
+}
+
