@@ -3,23 +3,67 @@ const WHITE = 1;
 const FREE = 2;
 
 class State {
-    constructor(player1, player2){
-        this.board=[
-            [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
-            [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
-            [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
-            [FREE, FREE, FREE, WHITE, BLACK, FREE, FREE, FREE],
-            [FREE, FREE, FREE, BLACK, WHITE, FREE, FREE, FREE],
-            [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
-            [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
-            [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE]
-        ];
+    constructor(old, player1=false, player2=false){
+        //First instance : new State(null, x, x) (x can be human or an ai)
+        //Then : state = new State(old)
+
+        //board
+        if(old == null){    
+            this.board=[
+                [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
+                [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
+                [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
+                [FREE, FREE, FREE, WHITE, BLACK, FREE, FREE, FREE],
+                [FREE, FREE, FREE, BLACK, WHITE, FREE, FREE, FREE],
+                [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
+                [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
+                [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE]
+            ];
+        }
+        else{
+            this.board = old.board
+        }
+        //player1
+        if (player1 != false)
+            this.player1 = player1;
+        else
+            this.player1 = old.player1;
+        //player2
+        if (player2 != false)
+            this.player2 = player2;
+        else
+            this.player2 = old.player2;
+        //Turn
         this.turn = BLACK;
-        this.player1 = player1;
-        this.player2 = player2;
     }
 
     //METHODS
+
+    /*
+    * Returns true if game is over
+    */
+    isGameOver(){
+        return this.getLegalMoves().length == 0;
+    }
+
+    /*
+    * Returns score for black and white
+    */
+    getScore(){
+        var res ={'white':0 ,'black':0};
+        let color =null;
+        for (let r=0 ;r<8 ; r++){
+            for (let c=0 ; c<8 ; c++){
+                color = this.board[r][c];
+                if (color == WHITE){
+                    res.white++;
+                } else if (color == BLACK){
+                    res.black++;
+                }
+            }
+        }
+        return res;
+    }
 
     /*
     * Returns a list of all the legal moves 
@@ -28,7 +72,7 @@ class State {
         let res = [];
         for (let r=0;r<8;r++){
             for(let c=0 ; c<8 ;c++){
-                if (flipedSquares(r,c).length != 0){
+                if (this.flipedSquares(r,c).length != 0){
                     res.push({row:r, col:c});
                 }
             }
@@ -37,13 +81,13 @@ class State {
     }
 
     /*
-    * Returns the new game state worresponding to (@row,@col) being played
+    * Returns the new game state corresponding to (@row,@col) being played
     */
     play(row,col){
         let fliped=this.flipedSquares(row,col); // gets all the tokens fliped by the play
-        // flips every token that has to
+        // flip every token that have to be fliped
         if (fliped.length != 0){
-            let newState = this.clone();
+            let newState = new State(currentState);
             let coord;
             for (coord of fliped){
                 newState.board[coord[0]][coord[1]] = this.turn;
@@ -53,13 +97,6 @@ class State {
         }else{
             //shouldn't happen
         }
-    }
-
-    /*
-    * Returns a deep copy of this
-    */
-    clone(){
-        return JSON.parse(JSON.stringify(this));
     }
 
     /*
@@ -89,18 +126,8 @@ class State {
     }
 
     /*
-    *
-    */
-    getSquare(r,c){
-        if(r < 0 || c < 0 || r >= 8 || c >= 8)
-            return null;
-        else
-            return this.board[r][c];
-
-    }
-    /*
-    *Returns a list of all the fliped squares if the @node whose coordinates are (@row,@col)
-    * is clicked
+    * Returns a list of all the fliped squares if the square whose coordinates are (@row,@col)
+    * is is played
     */
     flipedSquares(row, col){
         //If square chosen is already occupied
@@ -238,8 +265,4 @@ class State {
 
 };
 
-//TEST
-let state = new State('human', 'ai');
-let copy =  state.clone();
 
-newState = state.play(2,3)

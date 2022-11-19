@@ -1,6 +1,6 @@
-var AI ={
-    play : function(){
-        options = legalSquares();
-        playSquare(options[0].row,options[0].col);
+ai ={
+    play(){
+        options = currentState.getLegalMoves();
+        currentState = currentState.play(options[0].row,options[0].col);
     }
 }

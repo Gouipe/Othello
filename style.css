@@ -14,11 +14,11 @@
     border: 1px solid darkgrey;
     background-color: green;
 }
-.grid td[state='black'] {
+.grid td[state="0"] {
     background-color: black;
 }
 
-.grid td[state='white'] {
+.grid td[state="1"] {
     background-color: white;
 }
 
