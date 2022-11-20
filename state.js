@@ -88,7 +88,7 @@ class State {
         let fliped=this.flipedSquares(row,col); // gets all the tokens fliped by the play
         // flip every token that have to be fliped
         if (fliped.length != 0){
-            let newState = new State(currentState);
+            let newState = new State(this);
             let coord;
             for (coord of fliped){
                 newState.board[coord[0]][coord[1]] = this.turn;

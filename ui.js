@@ -45,34 +45,34 @@ ui = {
 
     //initialisation
     init() {
-        // Buttons to choose player 1 type (human,ai1...)
-        document.getElementById('player1Human').addEventListener('click', (function(){game.p1 = 'human'}));
-        document.getElementById('player1AI').addEventListener('click', (function(){game.p1 = ai}));
-        // Buttons to choose player 2 type (human,ai1...)
-        document.getElementById('player2AI').addEventListener('click', (function(){game.p2 = ai}));
-        //Button to launch game
-        document.getElementById('play').addEventListener('click', game.run.bind(game))
         grid = ui.createGrid();
         document.getElementById('grid-container').appendChild(grid);
     }
 }
+// Buttons to choose player 1 type (human,ai1...)
+document.getElementById('player1Human').addEventListener('click', (function(){game.p1 = 'human'}));
+document.getElementById('player1AI').addEventListener('click', (function(){game.p1 = ai}));
+// Buttons to choose player 2 type (human,ai1...)
+document.getElementById('player2AI').addEventListener('click', (function(){game.p2 = ai}));
+//Button to launch game
+document.getElementById('play').addEventListener('click', game.run.bind(game))
 
 /*
 * Callback added to every square of the board
 * Plays a token on the square whose coordinates are (@r,@c)
 */
 function playSquare(r, c) {
-    let options = currentState.getLegalMoves();
+    let options = game.currentState.getLegalMoves();
     // if the play corresponding to (@r, @c) is among the legal ones
     if (options.some(o => o.row == r && o.col == c)) {
         //back end update
-        currentState = currentState.placeToken(r, c);
+        game.currentState = game.currentState.placeToken(r, c);
         //front end update
-        ui.display(currentState);
+        ui.display(game.currentState);
 
         //notifies player2 to play. player2 is always an ai (no human vs human possible)
-        currentState = currentState.player2.play();
-        ui.display(currentState);
+        game.currentState = game.currentState.player2.play();
+        ui.display(game.currentState);
 
         //wait for (callback to be called)/(board to be clicked) for game to be continued
     }
