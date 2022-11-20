@@ -8,15 +8,23 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div>
+        <p>Player1 : <button id="player1Human">Human</button> <button id="player1AI">AI</button></p>
+        <p>Player2 : <button id="player2AI">AI</button></p>
+        <p><button id="play">Play</button></p>
+    </div>
+
     <div id="grid-container"></div>
+
     <div id="score">
         <p>Black:<span id="blackScore"></span></p>
         <p>White:<span id="whiteScore"></span></p>
     </div>
-    <script src="ui.js"></script>
+
     <script src="ai.js"></script>
-    <script src="game.js"></script>
     <script src="state.js"></script>
+    <script src="game.js"></script>
+    <script src="ui.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

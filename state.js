@@ -1,3 +1,4 @@
+// different values for each square of the board
 const BLACK = 0;
 const WHITE = 1;
 const FREE = 2;
@@ -83,7 +84,7 @@ class State {
     /*
     * Returns the new game state corresponding to (@row,@col) being played
     */
-    play(row,col){
+    placeToken(row,col){
         let fliped=this.flipedSquares(row,col); // gets all the tokens fliped by the play
         // flip every token that have to be fliped
         if (fliped.length != 0){
