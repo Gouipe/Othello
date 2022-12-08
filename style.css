@@ -14,7 +14,7 @@
     border: 1px solid darkgrey;
     background-color: green;
 }
-.grid td[state="0"] {
+.grid td[state="-1"] {
     background-color: black;
 }
 

@@ -39,8 +39,10 @@ ui = {
         score = state.getScore();
         document.getElementById('blackScore').innerHTML = score.black;
         document.getElementById('whiteScore').innerHTML = score.white;
+        document.getElementById('blackMoves').innerHTML = game.currentState.getLegalMoves().length;
+        document.getElementById('whiteMoves').innerHTML = game.currentState.getLegalMoves(game.currentState.turn, false).length;
         if (state.isGameOver())
-            document.getElementById('score').innerHTML += 'GAME OVER';
+            document.getElementById('score').innerHTML += 'GAME OVER : ' + game.currentState.winnerColor() + " wins";
     },
 
     //initialisation
@@ -51,9 +53,13 @@ ui = {
 }
 // Buttons to choose player 1 type (human,ai1...)
 document.getElementById('player1Human').addEventListener('click', (function(){game.p1 = 'human'}));
-document.getElementById('player1AI').addEventListener('click', (function(){game.p1 = ai}));
+document.getElementById('player1AIRandom').addEventListener('click', (function(){game.p1 = aiRandom}));
+document.getElementById('player1AIEasy').addEventListener('click', (function(){game.p1 = aiMiniMax; aiMiniMax.level = EASY}));
+document.getElementById('player1AIMedium').addEventListener('click', (function(){game.p1 = aiMiniMax; aiMiniMax.level = MEDIUM}));
 // Buttons to choose player 2 type (human,ai1...)
-document.getElementById('player2AI').addEventListener('click', (function(){game.p2 = ai}));
+document.getElementById('player2AIRandom').addEventListener('click', (function(){game.p2 = aiRandom}));
+document.getElementById('player2AIEasy').addEventListener('click', (function(){game.p2 = aiMiniMax; aiMiniMax.level = EASY}));
+document.getElementById('player2AIMedium').addEventListener('click', (function(){game.p2 = aiMiniMax; aiMiniMax.level = MEDIUM}));
 //Button to launch game
 document.getElementById('play').addEventListener('click', game.run.bind(game))
 

@@ -9,21 +9,36 @@
 </head>
 <body>
     <div>
-        <p>Player1 : <button id="player1Human">Human</button> <button id="player1AI">AI</button></p>
-        <p>Player2 : <button id="player2AI">AI</button></p>
+        <p>Player1/Black : 
+            <button id="player1Human">Human</button> 
+            <button id="player1AIRandom">AI Random</button>
+            <button id="player1AIEasy">AI Easy (Corners)</button>
+            <button id="player1AIMedium">AI Medium (Corners + Mobility)</button>
+        </p>
+        <p>Player2/White : 
+            <button id="player2AIRandom">AI Random</button>
+            <button id="player2AIEasy">AI Easy (Corners)</button>
+            <button id="player2AIMedium">AI Medium (Corners + Mobility)</button>
+
+        </p>
         <p><button id="play">Play</button></p>
     </div>
 
     <div id="grid-container"></div>
 
     <div id="score">
-        <p>Black:<span id="blackScore"></span></p>
-        <p>White:<span id="whiteScore"></span></p>
+        <p><b>Black</b>: Score=<span id="blackScore"></span></p>
+        <p><b>White</b>: Score=<span id="whiteScore"></span></p>
+        Coups possibles=<span id="blackMoves"></span>
+        Coups possibles pour l'adversaire=<span id="whiteMoves"></span>
     </div>
 
-    <script src="ai.js"></script>
+    <script src="constants.js"></script>
+    <script src="aiRandom.js"></script>
+    <script src="aiMiniMax.js"></script>
     <script src="state.js"></script>
     <script src="game.js"></script>
     <script src="ui.js"></script>
+    <script src="test.js"></script>
 </body>
 </html>

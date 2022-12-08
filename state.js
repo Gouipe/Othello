@@ -1,12 +1,8 @@
-// different values for each square of the board
-const BLACK = 0;
-const WHITE = 1;
-const FREE = 2;
-
 class State {
     constructor(old, player1=false, player2=false){
-        //First instance : new State(null, x, x) (x can be human or an ai)
-        //Then : state = new State(old)
+        //How to use constructor :
+        //-first instance : new State(null, x, x) (x can be human or an ai)
+        //-then : state = new State(old)
 
         //board
         if(old == null){    
@@ -22,9 +18,10 @@ class State {
             ];
         }
         else{
-            this.board = old.board
+            //deep copy of the board
+            this.board = JSON.parse(JSON.stringify(old.board));
         }
-        //player1
+        //player1 (black)
         if (player1 != false)
             this.player1 = player1;
         else
@@ -34,9 +31,14 @@ class State {
             this.player2 = player2;
         else
             this.player2 = old.player2;
-        //Turn
+        // Turn (black starts)
         this.turn = BLACK;
     }
+
+    //static property : coordinates of corners
+    static corners = [
+        [0,0], [0, 7], [7, 0], [7, 7]
+    ]
 
     //METHODS
 
@@ -47,6 +49,38 @@ class State {
         return this.getLegalMoves().length == 0;
     }
 
+    /*
+    * returns the winner
+    */
+    winner(){
+        if (this.isGameOver()){
+            let score = this.getScore();
+            if (score.black == score.white){
+                return null;
+            }
+            if (score.black > score.white){
+                return this.player1;
+            }else{
+                return this.player2;
+            }
+        }
+    }
+    /*
+    * Returns the volor of the winner
+    */
+    winnerColor(){
+        if (this.isGameOver()){
+            let score = this.getScore();
+            if (score.black == score.white){
+                return "nobody";
+            }
+            if (score.black > score.white){
+                return "black";
+            }else{
+                return "white";
+            }
+        }
+    }
     /*
     * Returns score for black and white
     */
@@ -67,16 +101,26 @@ class State {
     }
 
     /*
-    * Returns a list of all the legal moves 
+    * Returns a list of all the legal moves for player represented by @turn
     */
-    getLegalMoves(){
+    getLegalMoves(turn=this.turn){
         let res = [];
+        let toggled = false
+        // turn!=this.turn => checking the moves that opponent player can play
+        if (turn!=this.turn){
+            toggled = true
+            this.toggleTurn(); // we need to toggle turn to apply this.fipedSquares() for the right player
+        }
         for (let r=0;r<8;r++){
             for(let c=0 ; c<8 ;c++){
                 if (this.flipedSquares(r,c).length != 0){
                     res.push({row:r, col:c});
                 }
             }
+        }
+        //We toggle the turn back, to come back to original state
+        if (toggled){
+            this.toggleTurn();
         }
         return res;
     }
@@ -101,6 +145,12 @@ class State {
     }
 
     /*
+    * If turn == WHITE, turn becomes BLACK, and the other way around
+    */
+    toggleTurn(){
+        this.turn = this.turn == BLACK ? WHITE : BLACK;
+    }
+    /*
     * Checks if token whose coordinates are(@r, @c) is opposite color than current turn
     */
     oppositeColor(r, c){
@@ -112,6 +162,15 @@ class State {
         if(color1 == WHITE && this.turn == BLACK)
             return true;
         return false;
+    }
+
+    /*
+    * Returns true is field whose coordinates are (@r, @c) is valid and empty
+    */
+    isEmpty(r, c){
+        if(r < 0 || c < 0 || r >= 8 || c >= 8)
+            return false;
+        return this.board[r][c] == FREE
     }
 
     /*
@@ -128,7 +187,7 @@ class State {
 
     /*
     * Returns a list of all the fliped squares if the square whose coordinates are (@row,@col)
-    * is is played
+    *  is played
     */
     flipedSquares(row, col){
         //If square chosen is already occupied
@@ -262,6 +321,106 @@ class State {
         /*----------------------8 DIRECTION CHECKED-----------------------*/
     
         return res;
+    }
+
+    /*
+    * Returns an heuristic value of the state (this). This value is positive if the state is good for player to play (global object 
+    * "game" can tell us which player is to play)
+    */
+    heuristicValue1(level=EASY){
+        // global turn == color of current maximising player
+        let globalTurn = game.currentState.turn;
+        // heuristics to add at the end
+        let heuristicCorners = 0;
+        let heuristicMobility = 0;
+        let heuristicStability = 0;
+
+        // CHECK CORNERS
+        for (var coord of State.corners){
+            // If a corner is taken by player to play, heuristic improves
+            if (this.board[coord[0]][coord[1]] == globalTurn){
+                heuristicCorners += 100;
+            // if a corner is taken by opponent, heuristic diminishes
+            } else if (this.board[coord[0]][coord[1]] != FREE){
+                heuristicCorners -= 100;
+            }
+        }
+        if (level == EASY){
+            return heuristicCorners
+        }
+
+        // CHECK MOBILITY
+        let nbMaximisingMoves = this.getLegalMoves(globalTurn, true).length;
+        let nbMinimisingMoves = this.getLegalMoves(globalTurn, false).length;
+        // nb of moves maximising player can play - nb of moves minimising player can play) *20
+        // So having 5 more moves equals having a corner
+        heuristicMobility = (nbMaximisingMoves - nbMinimisingMoves)*10
+        if (level == MEDIUM){
+            return heuristicCorners + heuristicMobility
+        }
+
+        //CHECK STABILITY
+
+        return heuristicCorners + heuristicMobility + heuristicStability;
+    }
+
+    heuristicValue(level=EASY){
+        // heuristics to add at the end
+        let heuristicCorners = 0;
+        let heuristicMobility = 0;
+        let heuristicPotentialMobility = 0;
+        let heuristicStability = 0;
+
+        // CHECK CORNERS
+        let corners = 0;
+        let opposentCorners = 0;
+        for (var coord of State.corners){
+            // If a corner is taken by player that just played, heuristic improves
+            if (this.board[coord[0]][coord[1]] == -this.turn){
+                corners += 1;
+            // if a corner is taken by opponent, heuristic diminishes
+            } else if (this.board[coord[0]][coord[1]] != FREE){
+                opposentCorners += 1;
+            }
+        }
+        heuristicCorners = (corners - opposentCorners) * 100
+        if (level == EASY){
+            return heuristicCorners
+        }
+
+        // CHECK MOBILITY : if many possible moves => many good moves to play or opponent is forced to play bad moves if he has few
+        let nbMaximisingMoves = this.getLegalMoves(-this.turn).length;
+        let nbMinimisingMoves = this.getLegalMoves(this.turn).length;
+        // nb of moves maximising player can play - nb of moves minimising player can play) *20
+        heuristicMobility = (nbMaximisingMoves - nbMinimisingMoves)*10
+
+
+        //CHECK POTENTIAL MOBILITY : if opponent has many tokens adjacent to free field, potential mobility increases
+        let nbOpposentTokenAdjacentEmptyField = 0;
+        let nbTokenAdjacentEmptyField = 0;
+        for(let r=0; r<8 ; r++){
+            for(let c=0 ; c<8 ; c++){
+                if (this.board[r][c] == this.turn){
+                    if (this.isEmpty(r+1, c) || this.isEmpty(r+1, c+1) || this.isEmpty(r, c+1) || this.isEmpty(r-1, c+1) || this.isEmpty(r-1, c)
+                    || this.isEmpty(r-1, c-1) || this.isEmpty(r, c-1) || this.isEmpty(r+1, c-1)){
+                        nbOpposentTokenAdjacentEmptyField++;
+                    }
+                }
+                if (this.board[r][c] == -this.turn){
+                    if (this.isEmpty(r+1, c) || this.isEmpty(r+1, c+1) || this.isEmpty(r, c+1) || this.isEmpty(r-1, c+1) || this.isEmpty(r-1, c)
+                    || this.isEmpty(r-1, c-1) || this.isEmpty(r, c-1) || this.isEmpty(r+1, c-1)){
+                        nbTokenAdjacentEmptyField++;
+                    }
+                }
+            }
+        }
+        // potential mobility =
+        heuristicPotentialMobility = (-nbOpposentTokenAdjacentEmptyField  + nbTokenAdjacentEmptyField) * 10
+        
+
+        //CHECK STABILITY
+
+        return heuristicCorners + heuristicMobility + heuristicPotentialMobility + heuristicStability;
     }
 
 };

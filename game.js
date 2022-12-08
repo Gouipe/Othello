@@ -3,11 +3,10 @@ game = {
     currentPlayer: null,
     currentState : null,
     p1: null, //player1
-    p2: ai, //player2
+    p2: null, //player2
 
 
     run() {
-        console.log('run')
         ui.init();
         this.currentState = new State(null, this.p1, this.p2);
         ui.display(this.currentState);
