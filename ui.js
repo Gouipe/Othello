@@ -1,4 +1,7 @@
 ui = {
+    //Attribute that indicates if the grid has already been created
+    initialised: false,
+
     // Creates the HTML grid for the game board
     createGrid() {
         //Create table tag
@@ -39,27 +42,35 @@ ui = {
         score = state.getScore();
         document.getElementById('blackScore').innerHTML = score.black;
         document.getElementById('whiteScore').innerHTML = score.white;
-        document.getElementById('blackMoves').innerHTML = game.currentState.getLegalMoves().length;
-        document.getElementById('whiteMoves').innerHTML = game.currentState.getLegalMoves(game.currentState.turn, false).length;
+        // document.getElementById('blackMoves').innerHTML = game.currentState.getLegalMoves().length;
+        // document.getElementById('whiteMoves').innerHTML = game.currentState.getLegalMoves(game.currentState.turn, false).length;
         if (state.isGameOver())
-            document.getElementById('score').innerHTML += 'GAME OVER : ' + game.currentState.winnerColor() + " wins";
+            document.getElementById('result').innerHTML = 'GAME OVER : ' + game.currentState.winnerColor() + " wins";
     },
 
     //initialisation
     init() {
         grid = ui.createGrid();
-        document.getElementById('grid-container').appendChild(grid);
+        // if the grid has not been already initialised,
+        if (!this.initialised) {
+            document.getElementById('grid-container').appendChild(grid);
+            //grid has been initialised
+            this.initialised = true
+        }
+        // else{
+        //     document.getElementById('grid-container').replaceChild(grid, document.getElementById('gridId'))
+        // }
     }
 }
 // Buttons to choose player 1 type (human,ai1...)
-document.getElementById('player1Human').addEventListener('click', (function(){game.p1 = 'human'}));
-document.getElementById('player1AIRandom').addEventListener('click', (function(){game.p1 = aiRandom}));
-document.getElementById('player1AIEasy').addEventListener('click', (function(){game.p1 = aiMiniMax; aiMiniMax.level = EASY}));
-document.getElementById('player1AIMedium').addEventListener('click', (function(){game.p1 = aiMiniMax; aiMiniMax.level = MEDIUM}));
+document.getElementById('player1Human').addEventListener('click', (function () { game.p1 = 'human' }));
+document.getElementById('player1AIRandom').addEventListener('click', (function () { game.p1 = aiRandom }));
+document.getElementById('player1AIEasy').addEventListener('click', (function () { game.p1 = new AiNegaMax(EASY) }));
+document.getElementById('player1AIMedium').addEventListener('click', (function () { game.p1 = new AiNegaMax(MEDIUM) }));
 // Buttons to choose player 2 type (human,ai1...)
-document.getElementById('player2AIRandom').addEventListener('click', (function(){game.p2 = aiRandom}));
-document.getElementById('player2AIEasy').addEventListener('click', (function(){game.p2 = aiMiniMax; aiMiniMax.level = EASY}));
-document.getElementById('player2AIMedium').addEventListener('click', (function(){game.p2 = aiMiniMax; aiMiniMax.level = MEDIUM}));
+document.getElementById('player2AIRandom').addEventListener('click', (function () { game.p2 = aiRandom }));
+document.getElementById('player2AIEasy').addEventListener('click', (function () { game.p2 = new AiNegaMax(EASY) }));
+document.getElementById('player2AIMedium').addEventListener('click', (function () { game.p2 = new AiNegaMax(MEDIUM) }));
 //Button to launch game
 document.getElementById('play').addEventListener('click', game.run.bind(game))
 
@@ -77,8 +88,8 @@ function playSquare(r, c) {
         ui.display(game.currentState);
 
         //notifies player2 to play. player2 is always an ai (no human vs human possible)
-        game.currentState = game.currentState.player2.play();
-        ui.display(game.currentState);
+        setTimeout(function () { game.currentState = game.currentState.player2.play(); ui.display(game.currentState); }, 500);
+
 
         //wait for (callback to be called)/(board to be clicked) for game to be continued
     }

@@ -21,6 +21,7 @@ game = {
                 // switch turn
                 this.currentPlayer = this.currentPlayer == this.currentState.player1 ? this.currentState.player2 : this.currentState.player1;
             }
+            
         }
     }
 }

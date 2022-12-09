@@ -1,9 +1,9 @@
 test = function(){
     game.p1 = aiRandom
-    game.p2 = aiMiniMax
-    aiMiniMax.level = MEDIUM
-    let nbWinsRandom = 0;
-    let nbWinsMiniMax = 0;
+    game.p2 = new AiNegaMax(MEDIUM)
+
+    let nbWinsp1 = 0;
+    let nbWinsp2 = 0;
     let start = performance.now();
 
     // On fait 20 oppositions entre aiRandom et aiMiniMax et on enregistre les résultats
@@ -11,9 +11,9 @@ test = function(){
         game.run()
         if (game.currentState.isGameOver()){
             if (game.currentState.winner() == game.p1){
-                nbWinsRandom++;
+                nbWinsp1++;
             }else if (game.currentState.winner() == game.p2){
-                nbWinsMiniMax++;
+                nbWinsp2++;
             }
         }
     }
@@ -21,7 +21,7 @@ test = function(){
     let time = parseInt((performance.now() - start) / 1000);
 
     //Affichage du nombre de victoires de chaque joueur et la durée d'éxécution
-    console.log("Random : " + nbWinsRandom);
-    console.log("MniMax : " + nbWinsMiniMax);
+    console.log("Player 1 : " + nbWinsp1);
+    console.log("Player 2 : " + nbWinsp2);
     console.log("Durée d'éxécution : " + time + " sec");
 }

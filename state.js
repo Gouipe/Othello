@@ -1,12 +1,12 @@
 class State {
-    constructor(old, player1=false, player2=false){
+    constructor(old, player1 = false, player2 = false) {    
         //How to use constructor :
         //-first instance : new State(null, x, x) (x can be human or an ai)
         //-then : state = new State(old)
 
         //board
-        if(old == null){    
-            this.board=[
+        if (old == null) {
+            this.board = [
                 [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
                 [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
                 [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE],
@@ -17,7 +17,7 @@ class State {
                 [FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE]
             ];
         }
-        else{
+        else {
             //deep copy of the board
             this.board = JSON.parse(JSON.stringify(old.board));
         }
@@ -37,7 +37,19 @@ class State {
 
     //static property : coordinates of corners
     static corners = [
-        [0,0], [0, 7], [7, 0], [7, 7]
+        [0, 0], [0, 7], [7, 0], [7, 7]
+    ]
+    // table that contains for each field the corresponding value. A good field is a field that is stable or that
+    // doesn't give the opportunity to the opponent to get a stable field 
+    static valueTable = [
+        [4, -3, 2, 2, 2, 2, -3, -4],
+        [-3, -4, -1, -1, -1, -1, -4, -3],
+        [2, -1, 1, 0, 0, 1, -1, 2],
+        [2, -1, 0, 1, 1, 0, -1, 2],
+        [2, -1, 0, 1, 1, 0, -1, 2],
+        [2, -1, 1, 0, 0, 1, -1, 2],
+        [-3, -4, -1, -1, -1, -1, -4, -3],
+        [4, -3, 2, 2, 2, 2, -3, -4],
     ]
 
     //METHODS
@@ -45,22 +57,22 @@ class State {
     /*
     * Returns true if game is over
     */
-    isGameOver(){
+    isGameOver() {
         return this.getLegalMoves().length == 0;
     }
 
     /*
     * returns the winner
     */
-    winner(){
-        if (this.isGameOver()){
+    winner() {
+        if (this.isGameOver()) {
             let score = this.getScore();
-            if (score.black == score.white){
+            if (score.black == score.white) {
                 return null;
             }
-            if (score.black > score.white){
+            if (score.black > score.white) {
                 return this.player1;
-            }else{
+            } else {
                 return this.player2;
             }
         }
@@ -68,15 +80,15 @@ class State {
     /*
     * Returns the volor of the winner
     */
-    winnerColor(){
-        if (this.isGameOver()){
+    winnerColor() {
+        if (this.isGameOver()) {
             let score = this.getScore();
-            if (score.black == score.white){
+            if (score.black == score.white) {
                 return "nobody";
             }
-            if (score.black > score.white){
+            if (score.black > score.white) {
                 return "black";
-            }else{
+            } else {
                 return "white";
             }
         }
@@ -84,15 +96,15 @@ class State {
     /*
     * Returns score for black and white
     */
-    getScore(){
-        var res ={'white':0 ,'black':0};
-        let color =null;
-        for (let r=0 ;r<8 ; r++){
-            for (let c=0 ; c<8 ; c++){
+    getScore() {
+        var res = { 'white': 0, 'black': 0 };
+        let color = null;
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
                 color = this.board[r][c];
-                if (color == WHITE){
+                if (color == WHITE) {
                     res.white++;
-                } else if (color == BLACK){
+                } else if (color == BLACK) {
                     res.black++;
                 }
             }
@@ -103,23 +115,23 @@ class State {
     /*
     * Returns a list of all the legal moves for player represented by @turn
     */
-    getLegalMoves(turn=this.turn){
+    getLegalMoves(turn = this.turn) {
         let res = [];
         let toggled = false
         // turn!=this.turn => checking the moves that opponent player can play
-        if (turn!=this.turn){
+        if (turn != this.turn) {
             toggled = true
             this.toggleTurn(); // we need to toggle turn to apply this.fipedSquares() for the right player
         }
-        for (let r=0;r<8;r++){
-            for(let c=0 ; c<8 ;c++){
-                if (this.flipedSquares(r,c).length != 0){
-                    res.push({row:r, col:c});
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                if (this.flipedSquares(r, c).length != 0) {
+                    res.push({ row: r, col: c });
                 }
             }
         }
         //We toggle the turn back, to come back to original state
-        if (toggled){
+        if (toggled) {
             this.toggleTurn();
         }
         return res;
@@ -128,18 +140,18 @@ class State {
     /*
     * Returns the new game state corresponding to (@row,@col) being played
     */
-    placeToken(row,col){
-        let fliped=this.flipedSquares(row,col); // gets all the tokens fliped by the play
+    placeToken(row, col) {
+        let fliped = this.flipedSquares(row, col); // gets all the tokens fliped by the play
         // flip every token that have to be fliped
-        if (fliped.length != 0){
+        if (fliped.length != 0) {
             let newState = new State(this);
             let coord;
-            for (coord of fliped){
+            for (coord of fliped) {
                 newState.board[coord[0]][coord[1]] = this.turn;
             }
             newState.turn = this.turn == BLACK ? WHITE : BLACK;
             return newState;
-        }else{
+        } else {
             //shouldn't happen
         }
     }
@@ -147,19 +159,19 @@ class State {
     /*
     * If turn == WHITE, turn becomes BLACK, and the other way around
     */
-    toggleTurn(){
+    toggleTurn() {
         this.turn = this.turn == BLACK ? WHITE : BLACK;
     }
     /*
     * Checks if token whose coordinates are(@r, @c) is opposite color than current turn
     */
-    oppositeColor(r, c){
-        if(r < 0 || c < 0 || r >= 8 || c >= 8)
-         return false;
+    oppositeColor(r, c) {
+        if (r < 0 || c < 0 || r >= 8 || c >= 8)
+            return false;
         let color1 = this.board[r][c];
-        if(color1 == BLACK && this.turn == WHITE)
+        if (color1 == BLACK && this.turn == WHITE)
             return true;
-        if(color1 == WHITE && this.turn == BLACK)
+        if (color1 == WHITE && this.turn == BLACK)
             return true;
         return false;
     }
@@ -167,8 +179,8 @@ class State {
     /*
     * Returns true is field whose coordinates are (@r, @c) is valid and empty
     */
-    isEmpty(r, c){
-        if(r < 0 || c < 0 || r >= 8 || c >= 8)
+    isEmpty(r, c) {
+        if (r < 0 || c < 0 || r >= 8 || c >= 8)
             return false;
         return this.board[r][c] == FREE
     }
@@ -176,11 +188,11 @@ class State {
     /*
     * Checks if token whose coordinates are(@r, @c) is same color than current turn
     */
-    sameColor(r, c){
-        if(r < 0 || c < 0 || r >= 8 || c >= 8)
+    sameColor(r, c) {
+        if (r < 0 || c < 0 || r >= 8 || c >= 8)
             return false;
         let color1 = this.board[r][c];
-        if(color1 == this.turn)
+        if (color1 == this.turn)
             return true;
         return false;
     }
@@ -189,239 +201,223 @@ class State {
     * Returns a list of all the fliped squares if the square whose coordinates are (@row,@col)
     *  is played
     */
-    flipedSquares(row, col){
+    flipedSquares(row, col) {
         //If square chosen is already occupied
-        if(this.board[row][col] != FREE){
+        if (this.board[row][col] != FREE) {
             return [];
         }
-    
+
         let res = [];//what will be returned
-    
+
         /*----------CHECKS 8 DIRECTIONS----------------------*/
         //BELOW
-        let r = row+1; //current checked row
+        let r = row + 1; //current checked row
         let c = col;//current checked column
-        if(this.oppositeColor(r,c)){//square below is opposite color
-            do{
+        if (this.oppositeColor(r, c)) {//square below is opposite color
+            do {
                 r++;
-            }while(this.oppositeColor(r,c));//series of square below are still opposite color
-            if(this.sameColor(r, c, this.turn)){//final square is same color
-                do{
+            } while (this.oppositeColor(r, c));//series of square below are still opposite color
+            if (this.sameColor(r, c, this.turn)) {//final square is same color
+                do {
                     r--;
-                    res.push([r,c]);
-                }while(r != row);
+                    res.push([r, c]);
+                } while (r != row);
             }
         }
         //LEFT
         r = row; //current checked row
-        c = col-1;//current checked column
-        if(this.oppositeColor(r,c)){
-            do{
+        c = col - 1;//current checked column
+        if (this.oppositeColor(r, c)) {
+            do {
                 c--;
-            }while(this.oppositeColor(r,c));
-            if(this.sameColor(r,c)){//final square is same color
-                do{
+            } while (this.oppositeColor(r, c));
+            if (this.sameColor(r, c)) {//final square is same color
+                do {
                     c++;
-                    res.push([r,c]);
-                }while(c != col);
+                    res.push([r, c]);
+                } while (c != col);
             }
         }
         //RIGHT
         r = row; //current checked row
-        c = col+1;//current checked column
-        if(this.oppositeColor(r,c)){
-            do{
+        c = col + 1;//current checked column
+        if (this.oppositeColor(r, c)) {
+            do {
                 c++;
-            }while(this.oppositeColor(r,c));
-            if(this.sameColor(r,c)){//final square is same color
-                do{
+            } while (this.oppositeColor(r, c));
+            if (this.sameColor(r, c)) {//final square is same color
+                do {
                     c--;
-                    res.push([r,c]);
-                }while(c != col);   
+                    res.push([r, c]);
+                } while (c != col);
             }
         }
         //TOP
-        r = row-1; //current checked row
+        r = row - 1; //current checked row
         c = col;//current checked column
-        if(this.oppositeColor(r,c)){//square on top is opposite color
-            do{
+        if (this.oppositeColor(r, c)) {//square on top is opposite color
+            do {
                 r--;
-            }while(this.oppositeColor(r,c));//series of square on top are different color
-            if(this.sameColor(r,c)){//final square is same color
-                do{
+            } while (this.oppositeColor(r, c));//series of square on top are different color
+            if (this.sameColor(r, c)) {//final square is same color
+                do {
                     r++;
-                    res.push([r,c])
-                }while(r != row);
+                    res.push([r, c])
+                } while (r != row);
             }
         }
         //Bottom RIGHT
-        r = row+1; //current checked row
-        c = col+1;//current checked column
-        if(this.oppositeColor(r,c)){
-            do{
+        r = row + 1; //current checked row
+        c = col + 1;//current checked column
+        if (this.oppositeColor(r, c)) {
+            do {
                 c++;
                 r++;
-            }while(this.oppositeColor(r,c));
-            if(this.sameColor(r,c)){//final square is same color
-                do{
+            } while (this.oppositeColor(r, c));
+            if (this.sameColor(r, c)) {//final square is same color
+                do {
                     r--;
                     c--;
-                    res.push([r,c]);
-                }while(r != row);
+                    res.push([r, c]);
+                } while (r != row);
             }
         }
         //TOP LEFT
-        r = row-1; //current checked row
-        c = col-1;//current checked column
-        if(this.oppositeColor(r,c)){
-            do{
+        r = row - 1; //current checked row
+        c = col - 1;//current checked column
+        if (this.oppositeColor(r, c)) {
+            do {
                 c--;
                 r--;
-            }while(this.oppositeColor(r,c));
-            if(this.sameColor(r,c)){//final square is same color
-                do{
+            } while (this.oppositeColor(r, c));
+            if (this.sameColor(r, c)) {//final square is same color
+                do {
                     r++;
                     c++;
-                    res.push([r,c]);
-                }while(r != row);
+                    res.push([r, c]);
+                } while (r != row);
             }
         }
         //TOP RIGHT
-        r = row-1; //current checked row
-        c = col+1;//current checked column
-        if(this.oppositeColor(r,c)){
-            do{
+        r = row - 1; //current checked row
+        c = col + 1;//current checked column
+        if (this.oppositeColor(r, c)) {
+            do {
                 c++;
                 r--;
-            }while(this.oppositeColor(r,c));
-            if(this.sameColor(r,c)){//final square is same color
-                do{
+            } while (this.oppositeColor(r, c));
+            if (this.sameColor(r, c)) {//final square is same color
+                do {
                     r++;
                     c--;
-                    res.push([r,c]);
-                }while(r != row);
+                    res.push([r, c]);
+                } while (r != row);
             }
         }
         //BELOW LEFT
-        r = row+1; //current checked row
-        c = col-1;//current checked column
-        if(this.oppositeColor(r,c)){
-            do{
+        r = row + 1; //current checked row
+        c = col - 1;//current checked column
+        if (this.oppositeColor(r, c)) {
+            do {
                 c--;
                 r++;
-            }while(this.oppositeColor(r,c));
-            if(this.sameColor(r,c)){//final square is same color
-                do{
+            } while (this.oppositeColor(r, c));
+            if (this.sameColor(r, c)) {//final square is same color
+                do {
                     r--;
                     c++;
-                    res.push([r,c]);
-                }while(r != row);
+                    res.push([r, c]);
+                } while (r != row);
             }
         }
         /*----------------------8 DIRECTION CHECKED-----------------------*/
-    
+
         return res;
     }
 
     /*
-    * Returns an heuristic value of the state (this). This value is positive if the state is good for player to play (global object 
-    * "game" can tell us which player is to play)
+    * Returns an heuristic value of the state (this). The higher the @level, the more precise is the heuristic
     */
-    heuristicValue1(level=EASY){
-        // global turn == color of current maximising player
-        let globalTurn = game.currentState.turn;
-        // heuristics to add at the end
-        let heuristicCorners = 0;
-        let heuristicMobility = 0;
-        let heuristicStability = 0;
-
-        // CHECK CORNERS
-        for (var coord of State.corners){
-            // If a corner is taken by player to play, heuristic improves
-            if (this.board[coord[0]][coord[1]] == globalTurn){
-                heuristicCorners += 100;
-            // if a corner is taken by opponent, heuristic diminishes
-            } else if (this.board[coord[0]][coord[1]] != FREE){
-                heuristicCorners -= 100;
-            }
-        }
-        if (level == EASY){
-            return heuristicCorners
-        }
-
-        // CHECK MOBILITY
-        let nbMaximisingMoves = this.getLegalMoves(globalTurn, true).length;
-        let nbMinimisingMoves = this.getLegalMoves(globalTurn, false).length;
-        // nb of moves maximising player can play - nb of moves minimising player can play) *20
-        // So having 5 more moves equals having a corner
-        heuristicMobility = (nbMaximisingMoves - nbMinimisingMoves)*10
-        if (level == MEDIUM){
-            return heuristicCorners + heuristicMobility
-        }
-
-        //CHECK STABILITY
-
-        return heuristicCorners + heuristicMobility + heuristicStability;
-    }
-
-    heuristicValue(level=EASY){
+    heuristicValue(level) {
         // heuristics to add at the end
         let heuristicCorners = 0;
         let heuristicMobility = 0;
         let heuristicPotentialMobility = 0;
         let heuristicStability = 0;
 
+
         // CHECK CORNERS
         let corners = 0;
         let opposentCorners = 0;
-        for (var coord of State.corners){
+        for (var coord of State.corners) {
             // If a corner is taken by player that just played, heuristic improves
-            if (this.board[coord[0]][coord[1]] == -this.turn){
+            if (this.board[coord[0]][coord[1]] == -this.turn) {
                 corners += 1;
-            // if a corner is taken by opponent, heuristic diminishes
-            } else if (this.board[coord[0]][coord[1]] != FREE){
+                // if a corner is taken by opponent, heuristic diminishes
+            } else if (this.board[coord[0]][coord[1]] != FREE) {
                 opposentCorners += 1;
             }
         }
-        heuristicCorners = (corners - opposentCorners) * 100
-        if (level == EASY){
+        // Each corner is worth 100 points
+        heuristicCorners = (corners - opposentCorners) * 200
+        if (level == EASY) {
             return heuristicCorners
         }
 
-        // CHECK MOBILITY : if many possible moves => many good moves to play or opponent is forced to play bad moves if he has few
-        let nbMaximisingMoves = this.getLegalMoves(-this.turn).length;
-        let nbMinimisingMoves = this.getLegalMoves(this.turn).length;
-        // nb of moves maximising player can play - nb of moves minimising player can play) *20
-        heuristicMobility = (nbMaximisingMoves - nbMinimisingMoves)*10
+        // CHECK MOBILITY : 
+        // if many possible moves => many good moves to play 
+        // if few possible moves => player can be forced to play bad moves
+        // number of moves for player that just played
+        let nbMaximisingMoves = this.getLegalMoves(this.turn).length;
+        //number of moves for opponent
+        let nbMinimisingMoves = this.getLegalMoves(-this.turn).length;
+        // nb of moves maximising player can play - nb of moves opponent player can play) *10
+        heuristicMobility = (nbMaximisingMoves - nbMinimisingMoves) * 10
 
-
-        //CHECK POTENTIAL MOBILITY : if opponent has many tokens adjacent to free field, potential mobility increases
+        
+        //CHECK POTENTIAL MOBILITY : 
+        // if opponent has many tokens adjacent to free field, potential mobility increases (potential
+        // number of moves to play increases)
         let nbOpposentTokenAdjacentEmptyField = 0;
         let nbTokenAdjacentEmptyField = 0;
-        for(let r=0; r<8 ; r++){
-            for(let c=0 ; c<8 ; c++){
-                if (this.board[r][c] == this.turn){
-                    if (this.isEmpty(r+1, c) || this.isEmpty(r+1, c+1) || this.isEmpty(r, c+1) || this.isEmpty(r-1, c+1) || this.isEmpty(r-1, c)
-                    || this.isEmpty(r-1, c-1) || this.isEmpty(r, c-1) || this.isEmpty(r+1, c-1)){
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                if (this.board[r][c] == this.turn) {
+                    if (this.isEmpty(r + 1, c) || this.isEmpty(r + 1, c + 1) || this.isEmpty(r, c + 1) || this.isEmpty(r - 1, c + 1) || this.isEmpty(r - 1, c)
+                        || this.isEmpty(r - 1, c - 1) || this.isEmpty(r, c - 1) || this.isEmpty(r + 1, c - 1)) {
                         nbOpposentTokenAdjacentEmptyField++;
                     }
                 }
-                if (this.board[r][c] == -this.turn){
-                    if (this.isEmpty(r+1, c) || this.isEmpty(r+1, c+1) || this.isEmpty(r, c+1) || this.isEmpty(r-1, c+1) || this.isEmpty(r-1, c)
-                    || this.isEmpty(r-1, c-1) || this.isEmpty(r, c-1) || this.isEmpty(r+1, c-1)){
+                if (this.board[r][c] == -this.turn) {
+                    if (this.isEmpty(r + 1, c) || this.isEmpty(r + 1, c + 1) || this.isEmpty(r, c + 1) || this.isEmpty(r - 1, c + 1) || this.isEmpty(r - 1, c)
+                        || this.isEmpty(r - 1, c - 1) || this.isEmpty(r, c - 1) || this.isEmpty(r + 1, c - 1)) {
                         nbTokenAdjacentEmptyField++;
                     }
                 }
             }
         }
-        // potential mobility =
-        heuristicPotentialMobility = (-nbOpposentTokenAdjacentEmptyField  + nbTokenAdjacentEmptyField) * 10
+        heuristicPotentialMobility = (-nbOpposentTokenAdjacentEmptyField + nbTokenAdjacentEmptyField) * 10
         
 
-        //CHECK STABILITY
+        //CHECK STABILITY :
+        // A field which is not likely to be fliped is stable (corners are very stable as they can't
+        // be fliped for example). The more tokens are stable, the better.
+        // We use the static attribute valueTable to get the usual stability of each field
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                if (this.board[r][c] == -this.turn) {
+                    heuristicStability += State.valueTable[r][c]
+                } else if (this.board[r][c] == this.turn) {
+                    heuristicStability -= State.valueTable[r][c]
+                }
+            }
+        }
+        heuristicStability = heuristicStability * 10
 
+        // Return the sum of all heuristics
         return heuristicCorners + heuristicMobility + heuristicPotentialMobility + heuristicStability;
     }
+    
 
 };
 

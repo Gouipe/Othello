@@ -6,4 +6,6 @@ const FREE = 2;
 // different heuristics to choose from
 const EASY = 0
 const MEDIUM = 1
-const HARD = 2
+
+//depth for negamax
+DEPTH = 2
