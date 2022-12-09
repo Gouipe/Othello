@@ -8,4 +8,4 @@ const EASY = 0
 const MEDIUM = 1
 
 //depth for negamax
-DEPTH = 2
+DEPTH = 5

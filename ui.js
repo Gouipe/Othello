@@ -84,13 +84,10 @@ function playSquare(r, c) {
     if (options.some(o => o.row == r && o.col == c)) {
         //back end update
         game.currentState = game.currentState.placeToken(r, c);
-        //front end update
+        //front end update 
         ui.display(game.currentState);
-
-        //notifies player2 to play. player2 is always an ai (no human vs human possible)
+        //notifies player2 to play with a little delay so that the ai'response is not too quick. Player2 is always 
+        // an ai (no human vs human possible)
         setTimeout(function () { game.currentState = game.currentState.player2.play(); ui.display(game.currentState); }, 500);
-
-
-        //wait for (callback to be called)/(board to be clicked) for game to be continued
     }
 }

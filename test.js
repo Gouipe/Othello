@@ -1,13 +1,13 @@
 test = function(){
+    game.p2= new AiNegaMax(MEDIUM)
     game.p1 = aiRandom
-    game.p2 = new AiNegaMax(MEDIUM)
 
     let nbWinsp1 = 0;
     let nbWinsp2 = 0;
     let start = performance.now();
 
-    // On fait 20 oppositions entre aiRandom et aiMiniMax et on enregistre les résultats
-    for(let i=0 ; i<10 ; i++){
+    // On fait 100 oppositions entre p1 et p2 et on enregistre les résultats
+    for(let i=0 ; i<50 ; i++){
         game.run()
         if (game.currentState.isGameOver()){
             if (game.currentState.winner() == game.p1){

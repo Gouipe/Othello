@@ -58,7 +58,7 @@ class State {
     * Returns true if game is over
     */
     isGameOver() {
-        return this.getLegalMoves().length == 0;
+        return this.getLegalMoves().length == 0 && this.getLegalMoves(-this.turn).length == 0;
     }
 
     /*
@@ -344,63 +344,71 @@ class State {
         let heuristicMobility = 0;
         let heuristicPotentialMobility = 0;
         let heuristicStability = 0;
+        let heuristicnbToken = 0;
 
-
-        // CHECK CORNERS
+        /********************************* CORNERS **********************************/
         let corners = 0;
         let opposentCorners = 0;
         for (var coord of State.corners) {
             // If a corner is taken by player that just played, heuristic improves
             if (this.board[coord[0]][coord[1]] == -this.turn) {
                 corners += 1;
-                // if a corner is taken by opponent, heuristic diminishes
-            } else if (this.board[coord[0]][coord[1]] != FREE) {
+            // if a corner is taken by opponent, heuristic diminishes
+            } else if (this.board[coord[0]][coord[1]] != FREE) 
                 opposentCorners += 1;
-            }
         }
-        // Each corner is worth 100 points
+        // Most efficient heuristic : each corner is worth 200 points (for each heuristics every multiplier
+        // is found by try and error so that the good heuristics have more weight than the others)
         heuristicCorners = (corners - opposentCorners) * 200
-        if (level == EASY) {
+
+        if (level == EASY){
             return heuristicCorners
         }
 
-        // CHECK MOBILITY : 
+        /*********************************** MOBILITY ************************************/
         // if many possible moves => many good moves to play 
         // if few possible moves => player can be forced to play bad moves
         // number of moves for player that just played
-        let nbMaximisingMoves = this.getLegalMoves(this.turn).length;
+        let nbMaximisingMoves = this.getLegalMoves(-this.turn).length;
         //number of moves for opponent
-        let nbMinimisingMoves = this.getLegalMoves(-this.turn).length;
-        // nb of moves maximising player can play - nb of moves opponent player can play) *10
+        let nbMinimisingMoves = this.getLegalMoves(this.turn).length;
+        // nb of moves current player can play - nb of moves opponent player can play) *10
         heuristicMobility = (nbMaximisingMoves - nbMinimisingMoves) * 10
 
         
-        //CHECK POTENTIAL MOBILITY : 
+        // /*********************************** POTENTIAL MOBILITY ************************************/
         // if opponent has many tokens adjacent to free field, potential mobility increases (potential
         // number of moves to play increases)
-        let nbOpposentTokenAdjacentEmptyField = 0;
+        let nbOpponentTokenAdjacentEmptyField = 0;
         let nbTokenAdjacentEmptyField = 0;
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
                 if (this.board[r][c] == this.turn) {
+                    //if opponent has a token next to free field
                     if (this.isEmpty(r + 1, c) || this.isEmpty(r + 1, c + 1) || this.isEmpty(r, c + 1) || this.isEmpty(r - 1, c + 1) || this.isEmpty(r - 1, c)
                         || this.isEmpty(r - 1, c - 1) || this.isEmpty(r, c - 1) || this.isEmpty(r + 1, c - 1)) {
-                        nbOpposentTokenAdjacentEmptyField++;
-                    }
-                }
-                if (this.board[r][c] == -this.turn) {
-                    if (this.isEmpty(r + 1, c) || this.isEmpty(r + 1, c + 1) || this.isEmpty(r, c + 1) || this.isEmpty(r - 1, c + 1) || this.isEmpty(r - 1, c)
-                        || this.isEmpty(r - 1, c - 1) || this.isEmpty(r, c - 1) || this.isEmpty(r + 1, c - 1)) {
-                        nbTokenAdjacentEmptyField++;
+                        nbOpponentTokenAdjacentEmptyField++;
                     }
                 }
             }
         }
-        heuristicPotentialMobility = (-nbOpposentTokenAdjacentEmptyField + nbTokenAdjacentEmptyField) * 10
-        
+        // This heuristic works well, so we multiply every found token by 10
+        heuristicPotentialMobility = nbOpponentTokenAdjacentEmptyField * 5
 
-        //CHECK STABILITY :
-        // A field which is not likely to be fliped is stable (corners are very stable as they can't
+
+
+        // /****************** NOMBRE TOKENS ********************/
+        // if (this.isGameOver()){
+        //     let score = this.getScore();
+        //     if (this.turn == BLACK){
+        //         heuristicnbToken = (score.white - score.black)*10
+        //     }
+        //     else{
+        //         heuristicnbToken =  (-score.white + score.black)*10
+        //     }}
+
+        /***********************************STABILITY************************************/   
+        // A field which is not likely to be fliped is stable (corner tokens are as stable as possible as they can't
         // be fliped for example). The more tokens are stable, the better.
         // We use the static attribute valueTable to get the usual stability of each field
         for (let r = 0; r < 8; r++) {
@@ -412,10 +420,14 @@ class State {
                 }
             }
         }
-        heuristicStability = heuristicStability * 10
+        // Has decent impact, 8 seems like a good number after some tests to not override the other heuristics
+        heuristicStability = heuristicStability * 8
+
+
+        
 
         // Return the sum of all heuristics
-        return heuristicCorners + heuristicMobility + heuristicPotentialMobility + heuristicStability;
+        return heuristicCorners + heuristicMobility + heuristicPotentialMobility + heuristicStability + heuristicnbToken;
     }
     
 
