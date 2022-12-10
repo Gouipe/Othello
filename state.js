@@ -42,14 +42,21 @@ class State {
     // table that contains for each field the corresponding value. A good field is a field that is stable or that
     // doesn't give the opportunity to the opponent to get a stable field 
     static valueTable = [
-        [4, -3, 2, 2, 2, 2, -3, -4],
+        [4, -3, 2, 2, 2, 2, -3, 4],
         [-3, -4, -1, -1, -1, -1, -4, -3],
         [2, -1, 1, 0, 0, 1, -1, 2],
         [2, -1, 0, 1, 1, 0, -1, 2],
         [2, -1, 0, 1, 1, 0, -1, 2],
         [2, -1, 1, 0, 0, 1, -1, 2],
         [-3, -4, -1, -1, -1, -1, -4, -3],
-        [4, -3, 2, 2, 2, 2, -3, -4],
+        [4, -3, 2, 2, 2, 2, -3, 4],
+    ]
+
+    static adjecentToCorners = [
+        [0,1], [1,0], [1,1], 
+        [0,6], [1,6], [1,7],
+        [6,0], [6,1], [7,1],
+        [6,7], [6,6], [7,6]
     ]
 
     //METHODS
@@ -344,26 +351,6 @@ class State {
         let heuristicMobility = 0;
         let heuristicPotentialMobility = 0;
         let heuristicStability = 0;
-        let heuristicnbToken = 0;
-
-        /********************************* CORNERS **********************************/
-        let corners = 0;
-        let opposentCorners = 0;
-        for (var coord of State.corners) {
-            // If a corner is taken by player that just played, heuristic improves
-            if (this.board[coord[0]][coord[1]] == -this.turn) {
-                corners += 1;
-            // if a corner is taken by opponent, heuristic diminishes
-            } else if (this.board[coord[0]][coord[1]] != FREE) 
-                opposentCorners += 1;
-        }
-        // Most efficient heuristic : each corner is worth 200 points (for each heuristics every multiplier
-        // is found by try and error so that the good heuristics have more weight than the others)
-        heuristicCorners = (corners - opposentCorners) * 200
-
-        if (level == EASY){
-            return heuristicCorners
-        }
 
         /*********************************** MOBILITY ************************************/
         // if many possible moves => many good moves to play 
@@ -374,6 +361,25 @@ class State {
         let nbMinimisingMoves = this.getLegalMoves(this.turn).length;
         // nb of moves current player can play - nb of moves opponent player can play) *10
         heuristicMobility = (nbMaximisingMoves - nbMinimisingMoves) * 10
+
+        if (level == EASY){
+            return heuristicMobility;
+        }
+
+        /********************************* CORNERS **********************************/
+        let corners = 0;
+        let opponentCorners = 0;
+        for (var coord of State.corners) {
+            // If a corner is taken by player that just played, heuristic improves
+            if (this.board[coord[0]][coord[1]] == -this.turn) {
+                corners += 1;
+            // if a corner is taken by opponent, heuristic diminishes
+            } else if (this.board[coord[0]][coord[1]] != FREE) 
+                opponentCorners += 1;
+        }
+        // Most efficient heuristic : each corner is worth 200 points (for each heuristics every multiplier
+        // is found by try and error so that the good heuristics have more weight than the others)
+        heuristicCorners = (corners - opponentCorners) * 200
 
         
         // /*********************************** POTENTIAL MOBILITY ************************************/
@@ -397,15 +403,15 @@ class State {
 
 
 
-        // /****************** NOMBRE TOKENS ********************/
-        // if (this.isGameOver()){
-        //     let score = this.getScore();
-        //     if (this.turn == BLACK){
-        //         heuristicnbToken = (score.white - score.black)*10
-        //     }
-        //     else{
-        //         heuristicnbToken =  (-score.white + score.black)*10
-        //     }}
+        // // /****************** NOMBRE TOKENS ********************/
+        // // if (this.isGameOver()){
+        // //     let score = this.getScore();
+        // //     if (this.turn == BLACK){
+        // //         heuristicnbToken = (score.white - score.black)*10
+        // //     }
+        // //     else{
+        // //         heuristicnbToken =  (-score.white + score.black)*10
+        // //     }}
 
         /***********************************STABILITY************************************/   
         // A field which is not likely to be fliped is stable (corner tokens are as stable as possible as they can't
@@ -415,7 +421,8 @@ class State {
             for (let c = 0; c < 8; c++) {
                 if (this.board[r][c] == -this.turn) {
                     heuristicStability += State.valueTable[r][c]
-                } else if (this.board[r][c] == this.turn) {
+                }
+                 else if (this.board[r][c] != FREE) {
                     heuristicStability -= State.valueTable[r][c]
                 }
             }
@@ -423,11 +430,8 @@ class State {
         // Has decent impact, 8 seems like a good number after some tests to not override the other heuristics
         heuristicStability = heuristicStability * 8
 
-
-        
-
         // Return the sum of all heuristics
-        return heuristicCorners + heuristicMobility + heuristicPotentialMobility + heuristicStability + heuristicnbToken;
+        return heuristicCorners + heuristicMobility + heuristicPotentialMobility + heuristicStability;
     }
     
 

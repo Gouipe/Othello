@@ -1,12 +1,12 @@
 test = function(){
-    game.p2= new AiNegaMax(MEDIUM)
-    game.p1 = aiRandom
+    game.p2 = new AiNegaMax(EASY)
+    game.p1 = new AiNegaMax(MEDIUM)
 
     let nbWinsp1 = 0;
     let nbWinsp2 = 0;
     let start = performance.now();
 
-    // On fait 100 oppositions entre p1 et p2 et on enregistre les résultats
+    // On fait x oppositions entre p1 et p2 et on enregistre les résultats
     for(let i=0 ; i<50 ; i++){
         game.run()
         if (game.currentState.isGameOver()){

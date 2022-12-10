@@ -18,7 +18,7 @@ class AiNegaMax {
         // look for the option with most value according to negamax()
         for (let option of options){
             currState = game.currentState.placeToken(option.row, option.col);
-            currentValue = this.negaMax(currState, DEPTH, -999999, -999999);
+            currentValue = this.negaMax(currState, DEPTH, -999999, +999999);
             if (currentValue > bestValue){
                 bestValue = currentValue;
                 bestState = currState;
