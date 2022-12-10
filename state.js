@@ -362,6 +362,7 @@ class State {
         // nb of moves current player can play - nb of moves opponent player can play) *10
         heuristicMobility = (nbMaximisingMoves - nbMinimisingMoves) * 10
 
+        // at easy level, we only look at mobility
         if (level == EASY){
             return heuristicMobility;
         }
@@ -377,8 +378,7 @@ class State {
             } else if (this.board[coord[0]][coord[1]] != FREE) 
                 opponentCorners += 1;
         }
-        // Most efficient heuristic : each corner is worth 200 points (for each heuristics every multiplier
-        // is found by try and error so that the good heuristics have more weight than the others)
+        // very efficient heuristic 
         heuristicCorners = (corners - opponentCorners) * 200
 
         
@@ -398,8 +398,8 @@ class State {
                 }
             }
         }
-        // This heuristic works well, so we multiply every found token by 10
-        heuristicPotentialMobility = nbOpponentTokenAdjacentEmptyField * 5
+        // This heuristic works well sometimes but bad at other times
+        heuristicPotentialMobility = nbOpponentTokenAdjacentEmptyField * 3
 
 
 
@@ -427,8 +427,8 @@ class State {
                 }
             }
         }
-        // Has decent impact, 8 seems like a good number after some tests to not override the other heuristics
-        heuristicStability = heuristicStability * 8
+        // Has decent impact
+        heuristicStability = heuristicStability * 3
 
         // Return the sum of all heuristics
         return heuristicCorners + heuristicMobility + heuristicPotentialMobility + heuristicStability;

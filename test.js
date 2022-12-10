@@ -1,6 +1,6 @@
 test = function(){
-    game.p2 = new AiNegaMax(EASY)
-    game.p1 = new AiNegaMax(MEDIUM)
+    game.p1 = new AiNegaMax(EASY)
+    game.p2 = new AiNegaMax(MEDIUM)
 
     let nbWinsp1 = 0;
     let nbWinsp2 = 0;
