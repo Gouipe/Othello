@@ -39,7 +39,7 @@ class AiNegaMax {
     negaMax(state, depth, alpha, beta){
         //Terminal node
         if (depth == 0 || state.isGameOver()){
-            return state.heuristicValue(this.level);
+            return state.heuristicValueNegamax(this.level);
         }
         //get all children of node = get all possible next states 
         let stateChildren = [];
@@ -50,12 +50,12 @@ class AiNegaMax {
         // maximiser and minimiser cases are simplified as one
         let value = -99999
         for(let child of stateChildren){
-            value = Math.max(value, -this.negaMax(child, depth-1, -beta, -alpha))
+            value = Math.max(value, this.negaMax(child, depth-1, -beta, -alpha))
             alpha = Math.max(alpha, value)
             if (alpha >= beta){
                 break
             }
         }
-        return value;
+        return -value;
     }
 }

@@ -39,13 +39,35 @@ ui = {
 
     // displays score corresponding to @state
     displayScore(state) {
+        //Affichage du nombre de points
         score = state.getScore();
         document.getElementById('blackScore').innerHTML = score.black;
         document.getElementById('whiteScore').innerHTML = score.white;
-        // document.getElementById('blackMoves').innerHTML = game.currentState.getLegalMoves().length;
-        // document.getElementById('whiteMoves').innerHTML = game.currentState.getLegalMoves(game.currentState.turn, false).length;
+        //Affichage du nombre de coups possibles
+        document.getElementById('blackMoves').innerHTML = game.currentState.getLegalMoves(-1).length;
+        document.getElementById('whiteMoves').innerHTML = game.currentState.getLegalMoves(1).length;
+        //Affichage de la stabilite
+        let blackStability = 0;
+        let whiteStability = 0;
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                if (game.currentState.board[r][c] == BLACK) {
+                    blackStability += State.valueTable[r][c]
+                }
+                 else if (game.currentState.board[r][c] == WHITE) {
+                    whiteStability += State.valueTable[r][c]
+                }
+            }
+        }
+        document.getElementById('blackStability').innerHTML = blackStability;
+        document.getElementById('whiteStability').innerHTML = whiteStability;
+
+        //Affichage du resultat si le jeu est fini
         if (state.isGameOver())
             document.getElementById('result').innerHTML = 'GAME OVER : ' + game.currentState.winnerColor() + " wins";
+        else {
+            document.getElementById('result').innerHTML = ""
+        }
     },
 
     //initialisation
@@ -62,15 +84,20 @@ ui = {
         // }
     }
 }
+
 // Buttons to choose player 1 type (human,ai1...)
 document.getElementById('player1Human').addEventListener('click', (function () { game.p1 = 'human' }));
 document.getElementById('player1AIRandom').addEventListener('click', (function () { game.p1 = aiRandom }));
 document.getElementById('player1AIEasy').addEventListener('click', (function () { game.p1 = new AiNegaMax(EASY) }));
 document.getElementById('player1AIMedium').addEventListener('click', (function () { game.p1 = new AiNegaMax(MEDIUM) }));
+
 // Buttons to choose player 2 type (human,ai1...)
 document.getElementById('player2AIRandom').addEventListener('click', (function () { game.p2 = aiRandom }));
 document.getElementById('player2AIEasy').addEventListener('click', (function () { game.p2 = new AiNegaMax(EASY) }));
 document.getElementById('player2AIMedium').addEventListener('click', (function () { game.p2 = new AiNegaMax(MEDIUM) }));
+document.getElementById('player2AICorner').addEventListener('click', (function () { game.p2 = new AiNegaMax(CORNER) }));
+document.getElementById('player2AIStability').addEventListener('click', (function () { game.p2 = new AiNegaMax(STABILITY) }));
+
 //Button to launch game
 document.getElementById('play').addEventListener('click', game.run.bind(game))
 
@@ -80,14 +107,22 @@ document.getElementById('play').addEventListener('click', game.run.bind(game))
 */
 function playSquare(r, c) {
     let options = game.currentState.getLegalMoves();
+    if (options.length == 0){
+        game.currentState.toggleTurn();
+        game.currentState = game.currentState.player2.play(); 
+        ui.display(game.currentState); 
+    }
     // if the play corresponding to (@r, @c) is among the legal ones
     if (options.some(o => o.row == r && o.col == c)) {
         //back end update
         game.currentState = game.currentState.placeToken(r, c);
         //front end update 
         ui.display(game.currentState);
-        //notifies player2 to play with a little delay so that the ai'response is not too quick. Player2 is always 
+        //notifies player2 to play with a little delay so that the ai response is not too quick after the human play. Player2 is always 
         // an ai (no human vs human possible)
-        setTimeout(function () { game.currentState = game.currentState.player2.play(); ui.display(game.currentState); }, 500);
+        setTimeout(function () { 
+            game.currentState = game.currentState.player2.play(); 
+            ui.display(game.currentState); 
+        }, 500);
     }
 }

@@ -345,7 +345,7 @@ class State {
     /*
     * Returns an heuristic value of the state (this). The higher the @level, the more precise is the heuristic
     */
-    heuristicValue(level) {
+    heuristicValueNegamax(level) {
         // heuristics to add at the end
         let heuristicCorners = 0;
         let heuristicMobility = 0;
@@ -381,8 +381,11 @@ class State {
         // very efficient heuristic 
         heuristicCorners = (corners - opponentCorners) * 200
 
+        if (level == CORNER){
+            return heuristicCorners;
+        }
         
-        // /*********************************** POTENTIAL MOBILITY ************************************/
+        // // /*********************************** POTENTIAL MOBILITY ************************************/
         // if opponent has many tokens adjacent to free field, potential mobility increases (potential
         // number of moves to play increases)
         let nbOpponentTokenAdjacentEmptyField = 0;
@@ -400,8 +403,6 @@ class State {
         }
         // This heuristic works well sometimes but bad at other times
         heuristicPotentialMobility = nbOpponentTokenAdjacentEmptyField * 3
-
-
 
         // // /****************** NOMBRE TOKENS ********************/
         // // if (this.isGameOver()){
@@ -430,10 +431,13 @@ class State {
         // Has decent impact
         heuristicStability = heuristicStability * 3
 
+        if (level == STABILITY){
+            return heuristicStability;
+        }
+
         // Return the sum of all heuristics
         return heuristicCorners + heuristicMobility + heuristicPotentialMobility + heuristicStability;
     }
-    
 
 };
 
